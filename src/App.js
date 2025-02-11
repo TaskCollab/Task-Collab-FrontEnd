@@ -1,24 +1,45 @@
-import logo from './logo.svg';
+import React from 'react';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import Login from './Pages/auth/Login.tsx';
+import Tasks from './Pages/tasks/ViewTasks.tsx';
+import ProtectedRoute from './Components/ProtectedRoute.tsx';
+
+
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <ToastContainer />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/Tasks" element={<Tasks />} />
+               {/* Page that requires login (any logged-in user can access) */}
+        {/* <Route
+          path="/user"
+          element={
+            <ProtectedRoute requireLogin={true}>
+              <UserPage />
+            </ProtectedRoute>
+          }
+        /> */}
+
+        {/* Page that requires the user to be an admin */}
+        {/* <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requireLogin={true} requiredRole="admin">
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        /> */}
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
