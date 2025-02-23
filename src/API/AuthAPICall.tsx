@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AUTH_API_URL } from '../Utils/Constants.tsx';
+import {AUTH_API_URL}  from '../Utils/Constants';
 
 export const login = async (username: string, password: string) => {
     try {
