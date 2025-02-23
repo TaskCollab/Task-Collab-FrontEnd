@@ -4,7 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import Login from './Pages/auth/Login.tsx';
-import Tasks from './Pages/tasks/ViewTasks.tsx';
+import Tasks from './Pages/Tasks/ViewTasks.tsx';
 import ProtectedRoute from './Components/ProtectedRoute.tsx';
 
 
