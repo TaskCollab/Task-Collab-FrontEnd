@@ -16,7 +16,6 @@ function validateForm() {
     } else {
         showMessage('Invalid username or password. Please try again.', 'error');
     }
-
     return false;
 }
 
