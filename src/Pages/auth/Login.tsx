@@ -1,79 +1,121 @@
-import { FormEvent, useState } from 'react';
-import axios from 'axios';
+import React, { FormEvent, useState } from 'react';
+import axios, { AxiosError } from 'axios';
 import { login } from '../../API/AuthAPICall';
-import './Login.css';
+import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Link,
+  Box,
+  Snackbar,
+  Alert as MuiAlert,
+} from '@mui/material';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
-    const [isError, setIsError] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
-        if (!username.trim() || !password.trim()) {
-            setMessage('Please fill in all fields');
-            setIsError(true);
-            return;
-        }
+    if (!username.trim() || !password.trim()) {
+      setMessage('Please fill in all fields');
+      setIsError(true);
+      setOpenSnackbar(true);
+      return;
+    }
 
-        try {
-            await login(username, password);
-            setMessage('Login successful!');
-            setIsError(false);
-            //if we success login, then we jump to another website, waiting for that website. 
-        } catch (error) {
-            let errorMessage = 'An error occurred during login';
-            if (axios.isAxiosError(error)) {
-                errorMessage = error.response?.data?.message || error.message;
-            } else if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            setMessage(errorMessage);
-            setIsError(true);
-        }
-    };
+    try {
+      await login(username, password);
+      setMessage('Login successful!');
+      setIsError(false);
+      setOpenSnackbar(true);
+      navigate('/home'); // Redirect to /home after successful login
+    } catch (error) {
+      let errorMessage = 'An error occurred during login';
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        errorMessage = (axiosError.response?.data as { message?: string })?.message || axiosError.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setMessage(errorMessage);
+      setIsError(true);
+      setOpenSnackbar(true);
+    }
+  };
 
-    return (
-        <div className="login-container">
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="username">Username/Email:</label>
-                    <input
-                        type="text"
-                        id="username"
-                        className="input-field"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        className="input-field"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                
-                <button type="submit" className="submit-btn">Login</button>
-                
-                {message && (
-                    <div className={isError ? 'error-message' : 'success-message'}>
-                        {message}
-                    </div>
-                )}
-                
-                <div className="forgot-password">
-                    <a href="/forgot-password">Forgot Password?</a>
-                </div>
-            </form>
-        </div>
-    );
+  const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  return (
+    <Container component="main" maxWidth="xs" sx={{ mt: 8 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          Login
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Username/Email"
+            name="username"
+            autoComplete="username"
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+            Login
+          </Button>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Link href="/forgot-password" variant="body2">
+              Forgot password?
+            </Link>
+          </Box>
+        </Box>
+      </Box>
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity={isError ? 'error' : 'success'}
+          sx={{ width: '100%' }}
+        >
+          {message}
+        </MuiAlert>
+      </Snackbar>
+    </Container>
+  );
 };
 
 export default Login;
