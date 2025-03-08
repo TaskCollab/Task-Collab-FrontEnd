@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app  # Bind mount the project directory
+      - /app/node_modules  # Anonymous volume to prevent conflicts
+    working_dir: /app
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: ["npm", "start"]
