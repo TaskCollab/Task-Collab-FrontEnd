@@ -1,0 +1,39 @@
+.view-tasks {
+    padding: 20px;
+  }
+  
+  .tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .tasks-table th, .tasks-table td {
+    border: 1px solid #ee1616;
+    padding: 8px;
+  }
+  
+  .tasks-table th {
+    background-color: #f4f4f4;
+    text-align: left;
+  }
+  
+  .tasks-table tr:hover {
+    background-color: #dfdf68;
+  }
+  
+  .actions-cell button {
+    padding: 4px 8px;
+    margin-right: 4px;
+  }
+  
+  .manage-users-btn {
+    float: right;
+    margin-bottom: 10px;
+  }
+  
+  .tasks-table input, .tasks-table select {
+    width: 95%;
+    padding: 4px;
+    font-size: 0.9em;
+  }
+  

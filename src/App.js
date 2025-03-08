@@ -18,9 +18,13 @@ function App() {
         <ToastContainer />
         <Routes>
           <Route path="/login" element={<Login />} />
+ viewtasks_pages
+          <Route path="/tasks" element={<Tasks />} />
+
           <Route path="/Tasks" element={<Tasks />} />
           <Route path="/" element={<Login />} />
           <Route path="/home" element={<TicketsPage />} />
+main
                {/* Page that requires login (any logged-in user can access) */}
         {/* <Route
           path="/user"
