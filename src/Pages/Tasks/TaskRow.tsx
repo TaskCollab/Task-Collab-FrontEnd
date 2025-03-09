@@ -1,4 +1,14 @@
 import React, { useState } from 'react';
+import {
+  TableRow,
+  TableCell,
+  TextField,
+  Select,
+  MenuItem,
+  Button,
+  IconButton,
+} from '@mui/material';
+import { Edit, Delete, Lock, LockOpen, Save, Cancel } from '@mui/icons-material';
 
 interface Task {
   id: string;
@@ -18,7 +28,13 @@ interface TaskRowProps {
   onLock: (taskId: string) => void;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({ task, isAdmin, onUpdate, onDelete, onLock }) => {
+const TaskRow: React.FC<TaskRowProps> = ({
+  task,
+  isAdmin,
+  onUpdate,
+  onDelete,
+  onLock,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState<Task>({ ...task });
 
@@ -26,7 +42,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, isAdmin, onUpdate, onDelete, on
     setEditedTask((prev) => ({ ...prev, [field]: value }));
   };
 
-  const saveChanges = () => { //we need to establish a try-catch method here, and implement API method inside this.
+  const saveChanges = () => {
     setIsEditing(false);
     onUpdate(editedTask);
   };
@@ -37,48 +53,99 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, isAdmin, onUpdate, onDelete, on
   };
 
   return (
-    <tr>
-      <td>{isEditing ? <input type="text" value={editedTask.title} onChange={(e) => handleChange('title', e.target.value)} /> : task.title}</td>
-      <td>{isEditing ? <input type="text" value={editedTask.assignee} onChange={(e) => handleChange('assignee', e.target.value)} /> : task.assignee}</td>
-      <td>{isEditing ? <input type="date" value={editedTask.dueDate} onChange={(e) => handleChange('dueDate', e.target.value)} /> : task.dueDate}</td>
-      <td>
+    <TableRow>
+      <TableCell>
         {isEditing ? (
-          <select value={editedTask.priority} onChange={(e) => handleChange('priority', e.target.value)}>
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-          </select>
-        ) : task.priority}
-      </td>
-      <td>
+          <TextField
+            value={editedTask.title}
+            onChange={(e) => handleChange('title', e.target.value)}
+            fullWidth
+          />
+        ) : (
+          task.title
+        )}
+      </TableCell>
+      <TableCell>
         {isEditing ? (
-          <select value={editedTask.status} onChange={(e) => handleChange('status', e.target.value)}>
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-        ) : task.status}
-      </td>
-      <td>
+          <TextField
+            value={editedTask.assignee}
+            onChange={(e) => handleChange('assignee', e.target.value)}
+            fullWidth
+          />
+        ) : (
+          task.assignee
+        )}
+      </TableCell>
+      <TableCell>
+        {isEditing ? (
+          <TextField
+            type="date"
+            value={editedTask.dueDate}
+            onChange={(e) => handleChange('dueDate', e.target.value)}
+            fullWidth
+          />
+        ) : (
+          task.dueDate
+        )}
+      </TableCell>
+      <TableCell>
+        {isEditing ? (
+          <Select
+            value={editedTask.priority}
+            onChange={(e) => handleChange('priority', e.target.value)}
+            fullWidth
+          >
+            <MenuItem value="High">High</MenuItem>
+            <MenuItem value="Medium">Medium</MenuItem>
+            <MenuItem value="Low">Low</MenuItem>
+          </Select>
+        ) : (
+          task.priority
+        )}
+      </TableCell>
+      <TableCell>
+        {isEditing ? (
+          <Select
+            value={editedTask.status}
+            onChange={(e) => handleChange('status', e.target.value)}
+            fullWidth
+          >
+            <MenuItem value="Open">Open</MenuItem>
+            <MenuItem value="In Progress">In Progress</MenuItem>
+            <MenuItem value="Completed">Completed</MenuItem>
+          </Select>
+        ) : (
+          task.status
+        )}
+      </TableCell>
+      <TableCell>
         {isEditing ? (
           <>
-            <button onClick={saveChanges}>Save</button>
-            <button onClick={cancelEdit}>Cancel</button>
+            <IconButton onClick={saveChanges} color="primary">
+              <Save />
+            </IconButton>
+            <IconButton onClick={cancelEdit} color="secondary">
+              <Cancel />
+            </IconButton>
           </>
         ) : (
           <>
-            <button onClick={() => setIsEditing(true)}>Edit</button>
-            <button onClick={() => onDelete(task.id)}>Delete</button>
+            <IconButton onClick={() => setIsEditing(true)} color="primary">
+              <Edit />
+            </IconButton>
+            <IconButton onClick={() => onDelete(task.id)} color="secondary">
+              <Delete />
+            </IconButton>
             {isAdmin && (
-              <button onClick={() => onLock(task.id)}>
-                {task.locked ? 'Unlock' : 'Lock'}
-              </button>
+              <IconButton onClick={() => onLock(task.id)} color="default">
+                {task.locked ? <Lock /> : <LockOpen />}
+              </IconButton>
             )}
           </>
         )}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 };
 
-export default TaskRow; //I did not do any unit testing yet, but I will do it soon.
+export default TaskRow;
