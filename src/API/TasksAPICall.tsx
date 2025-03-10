@@ -8,6 +8,15 @@ const taskApiClient = axios.create({
   }
 });
 
+const handleApiError = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    console.error('API Error:', error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || 'An API error occurred');
+  }
+  console.error('Unexpected error:', error);
+  throw new Error('An unexpected error occurred');
+};
+
 taskApiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token) {
@@ -23,8 +32,13 @@ export const TaskAPI = {
   },
 
   createTask: async (taskData: TaskDTO) => {
-    const response = await taskApiClient.post("/tasks", taskData);
-    return response.data;
+    try{
+      const response = await taskApiClient.post('/tasks', taskData);
+      return response.data;
+    }catch (error){
+      handleApiError(error);
+      throw error;
+    }
   },
 
   getTask: async (id: number) => {
@@ -48,6 +62,7 @@ interface TaskDTO {
   description: string;
   assignedTo: number;
   status: string;
+  priority: string;
   deadline: string;
 }
 

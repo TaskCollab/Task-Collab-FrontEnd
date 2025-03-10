@@ -1,4 +1,6 @@
 import React from 'react';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,11 +18,11 @@ function App() {
     <Router>
       <div className="App">
         <ToastContainer />
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Routes>
           <Route path="/login" element={<Login />} />
  viewtasks_pages
           <Route path="/tasks" element={<Tasks />} />
-
           <Route path="/Tasks" element={<Tasks />} />
           <Route path="/" element={<Login />} />
           <Route path="/home" element={<TicketsPage />} />
@@ -45,6 +47,7 @@ main
           }
         /> */}
         </Routes>
+        </LocalizationProvider>
       </div>
     </Router>
   );
