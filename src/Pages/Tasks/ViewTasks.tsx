@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Skeleton, Snackbar } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
+import AddIcon from '@mui/icons-material/Add';
 import TasksTable from './TasksTable';
 import { TaskAPI } from '../../API/TasksAPICall';
+import CreateTask from './CreateTask';
 
 type Task = {
   id: string;
@@ -19,20 +21,20 @@ const ViewTasks: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         const data = await TaskAPI.getUserTasks();
-        //Map API to local tasks format
-        const formattedTasks = data.map((task: { id: { toString: () => any; }; taskTitle: any; assignedTo: { toString: () => any; }; deadline: string; priority: string; status: string; }) => ({
+        const formattedTasks = data.map((task: any) => ({
           id: task.id.toString(),
           title: task.taskTitle,
-          assignee: task.assignedTo.toString(), //fetch user name from another API
-          dueDate: task.deadline.split('T')[0], 
+          assignee: task.assignedTo.toString(),
+          dueDate: task.deadline.split('T')[0],
           priority: task.priority as 'High' | 'Medium' | 'Low',
           status: task.status as 'Open' | 'In Progress' | 'Completed',
-          locked: false 
+          locked: false
         }));
         setTasks(formattedTasks);
       } catch (error) {
@@ -42,7 +44,6 @@ const ViewTasks: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchTasks();
   }, []);
   
@@ -106,6 +107,7 @@ const ViewTasks: React.FC = () => {
           Task Management
         </Typography>
         
+        <Box>
         {isAdmin && (
           <Button
             variant="contained"
@@ -120,7 +122,25 @@ const ViewTasks: React.FC = () => {
             Manage Users
           </Button>
         )}
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<AddIcon />}
+          onClick={() => setCreateDialogOpen (true)}
+          sx={{textTransform: 'none', borderRadius: 2, py: 1, px:3}}>
+            New Task
+          </Button>
+        </Box>
       </Box>
+
+      <CreateTask
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onTaskCreated={(newTask) => {
+          setTasks(prev => [newTask, ...prev] as Task[]);
+        }}
+        isAdmin={isAdmin}
+      />
 
       {loading ? (
         <Box sx={{ width: '100%' }}>
