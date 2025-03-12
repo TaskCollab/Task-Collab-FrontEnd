@@ -7,11 +7,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import Login from './Pages/auth/Login.tsx';
 import Tasks from './Pages/tasks/ViewTasks.tsx';
+import TaskDetails from './Pages/tasks/TaskDetails.tsx'; // Import TaskDetails
 import ProtectedRoute from './Components/ProtectedRoute.tsx';
 import TicketsPage from './Pages/Landing/LandingPage.tsx';
-
-
-
 
 function App() {
   return (
@@ -19,34 +17,34 @@ function App() {
       <div className="App">
         <ToastContainer />
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
- viewtasks_pages
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/Tasks" element={<Tasks />} />
-          <Route path="/" element={<Login />} />
-          <Route path="/home" element={<TicketsPage />} />
-main
-               {/* Page that requires login (any logged-in user can access) */}
-        {/* <Route
-          path="/user"
-          element={
-            <ProtectedRoute requireLogin={true}>
-              <UserPage />
-            </ProtectedRoute>
-          }
-        /> */}
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/Tasks" element={<Tasks />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/home" element={<TicketsPage />} />
+            <Route path="/tasks/:taskId" element={<TaskDetails />} /> {/* Add TaskDetails route */}
 
-        {/* Page that requires the user to be an admin */}
-        {/* <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requireLogin={true} requiredRole="admin">
-              <AdminPage />
-            </ProtectedRoute>
-          }
-        /> */}
-        </Routes>
+            {/* Page that requires login (any logged-in user can access) */}
+            {/* <Route
+              path="/user"
+              element={
+                <ProtectedRoute requireLogin={true}>
+                  <UserPage />
+                </ProtectedRoute>
+              }
+            /> */}
+
+            {/* Page that requires the user to be an admin */}
+            {/* <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireLogin={true} requiredRole="admin">
+                  <AdminPage />
+                </ProtectedRoute>
+              }
+            /> */}
+          </Routes>
         </LocalizationProvider>
       </div>
     </Router>
