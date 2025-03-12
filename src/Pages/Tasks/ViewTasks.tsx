@@ -1,10 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Skeleton, Snackbar } from '@mui/material';
+import { 
+  Box, 
+  Button, 
+  Typography, 
+  Skeleton, 
+  Snackbar,
+  TextField,
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import GroupIcon from '@mui/icons-material/Group';
 import AddIcon from '@mui/icons-material/Add';
 import TasksTable from './TasksTable';
 import { TaskAPI } from '../../API/TasksAPICall';
 import CreateTask from './CreateTask';
+
 
 type Task = {
   id: string;
@@ -22,11 +37,18 @@ const ViewTasks: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data = await TaskAPI.getUserTasks();
+        const data = await TaskAPI.getUserTasks({
+          search: searchTerm,
+          priority: priorityFilter,
+          status: statusFilter
+        });
         const formattedTasks = data.map((task: any) => ({
           id: task.id.toString(),
           title: task.taskTitle,
@@ -45,7 +67,7 @@ const ViewTasks: React.FC = () => {
       }
     };
     fetchTasks();
-  }, []);
+  }, [searchTerm, priorityFilter, statusFilter]);
   
 //I have removed the example tasks from local machine
 
@@ -108,29 +130,76 @@ const ViewTasks: React.FC = () => {
         </Typography>
         
         <Box>
-        {isAdmin && (
+          {isAdmin && (
+            <Button
+              variant="contained"
+              startIcon={<GroupIcon />}
+              sx={{ mr: 2, textTransform: 'none', borderRadius: 2, py: 1, px: 3 }}
+            >
+              Manage Users
+            </Button>
+          )}
           <Button
             variant="contained"
-            startIcon={<GroupIcon />}
-            sx={{ 
-              textTransform: 'none',
-              borderRadius: 2,
-              py: 1,
-              px: 3
-            }}
+            color="secondary"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateDialogOpen(true)}
+            sx={{ textTransform: 'none', borderRadius: 2, py: 1, px: 3 }}
           >
-            Manage Users
-          </Button>
-        )}
-        <Button
-          variant="contained"
-          color="secondary"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateDialogOpen (true)}
-          sx={{textTransform: 'none', borderRadius: 2, py: 1, px:3}}>
             New Task
           </Button>
         </Box>
+      </Box>
+      
+      <Box sx={{ mb: 3 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Search tasks..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item xs={6} sm={3} md={2}>
+            <FormControl fullWidth>
+              <InputLabel>Priority</InputLabel>
+              <Select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                label="Priority"
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="High">High</MenuItem>
+                <MenuItem value="Medium">Medium</MenuItem>
+                <MenuItem value="Low">Low</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6} sm={3} md={2}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                label="Status"
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="Open">Open</MenuItem>
+                <MenuItem value="In Progress">In Progress</MenuItem>
+                <MenuItem value="Completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
       </Box>
 
       <CreateTask

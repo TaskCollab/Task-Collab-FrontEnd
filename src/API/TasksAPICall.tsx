@@ -26,11 +26,21 @@ taskApiClient.interceptors.request.use((config) => {
 });
 
 export const TaskAPI = {
-  getUserTasks: async () => {
-    const response = await taskApiClient.get("/my-tasks");
+  getUserTasks: async (filters?: {
+    search?: string;
+    priority?: string;
+    status?: string;
+  }) => {
+    const response = await taskApiClient.get("/my-tasks", {
+      params: {
+        q: filters?.search,
+        priority: filters?.priority,
+        status: filters?.status
+      }
+    });
     return response.data;
   },
-
+  
   createTask: async (taskData: TaskDTO) => {
     try{
       const response = await taskApiClient.post('/tasks', taskData);
