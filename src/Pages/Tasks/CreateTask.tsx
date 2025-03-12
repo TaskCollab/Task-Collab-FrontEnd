@@ -144,7 +144,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
           <DatePicker
             label="Due Date"
             value={dueDate}
-            onChange={(newValue) => setDueDate(newValue)}
+            onChange={(newValue: React.SetStateAction<Date | null>) => setDueDate(newValue)}
             minDate={new Date()}
           />
           {errors.dueDate && (

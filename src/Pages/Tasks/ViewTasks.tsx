@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import TasksTable from './TasksTable';
 import { TaskAPI } from '../../API/TasksAPICall';
 import CreateTask from './CreateTask';
+import { useNavigate } from 'react-router-dom';
 
 type Task = {
   id: string;
@@ -22,6 +23,7 @@ const ViewTasks: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -34,7 +36,7 @@ const ViewTasks: React.FC = () => {
           dueDate: task.deadline.split('T')[0],
           priority: task.priority as 'High' | 'Medium' | 'Low',
           status: task.status as 'Open' | 'In Progress' | 'Completed',
-          locked: false
+          locked: false,
         }));
         setTasks(formattedTasks);
       } catch (error) {
@@ -46,22 +48,18 @@ const ViewTasks: React.FC = () => {
     };
     fetchTasks();
   }, []);
-  
-//I have removed the example tasks from local machine
 
   const handleUpdateTask = async (updatedTask: Task) => {
     try {
-      //convert back to API format if needed
       const updateData = {
         taskTitle: updatedTask.title,
         assignedTo: parseInt(updatedTask.assignee),
         deadline: `${updatedTask.dueDate}T23:59:59`,
         status: updatedTask.status,
-        priority: updatedTask.priority
+        priority: updatedTask.priority,
       };
-      
       await TaskAPI.updateTask(parseInt(updatedTask.id), updateData);
-      setTasks(prev => prev.map(task => task.id === updatedTask.id ? updatedTask : task));
+      setTasks((prev) => prev.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
     } catch (error) {
       console.error('Error updating task:', error);
       setError('Failed to update task');
@@ -71,7 +69,7 @@ const ViewTasks: React.FC = () => {
   const handleDeleteTask = async (taskId: string) => {
     try {
       await TaskAPI.deleteTask(parseInt(taskId));
-      setTasks(prev => prev.filter(task => task.id !== taskId));
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
     } catch (error) {
       console.error('Error deleting task:', error);
       setError('Failed to delete task');
@@ -80,11 +78,9 @@ const ViewTasks: React.FC = () => {
 
   const handleLockTask = async (taskId: string) => {
     try {
-      //Lock end points in API
-      //if we have it, then use this TaskAPI.lockTask(parseInt(taskId));
-      setTasks(prev => prev.map(task => 
-        task.id === taskId ? { ...task, locked: !task.locked } : task
-      ));
+      setTasks((prev) =>
+        prev.map((task) => (task.id === taskId ? { ...task, locked: !task.locked } : task))
+      );
     } catch (error) {
       console.error('Error locking task:', error);
       setError('Failed to toggle lock status');
@@ -93,41 +89,47 @@ const ViewTasks: React.FC = () => {
 
   return (
     <Box sx={{ p: 4, maxWidth: 1200, margin: '0 auto' }}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 4 
-      }}>
-        <Typography variant="h1" sx={{ 
-          fontSize: '2.5rem', 
-          fontWeight: 500, 
-          color: 'primary.main' 
-        }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
+        }}
+      >
+        <Typography
+          variant="h1"
+          sx={{
+            fontSize: '2.5rem',
+            fontWeight: 500,
+            color: 'primary.main',
+          }}
+        >
           Task Management
         </Typography>
-        
+
         <Box>
-        {isAdmin && (
+          {isAdmin && (
+            <Button
+              variant="contained"
+              startIcon={<GroupIcon />}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 2,
+                py: 1,
+                px: 3,
+              }}
+            >
+              Manage Users
+            </Button>
+          )}
           <Button
             variant="contained"
-            startIcon={<GroupIcon />}
-            sx={{ 
-              textTransform: 'none',
-              borderRadius: 2,
-              py: 1,
-              px: 3
-            }}
+            color="secondary"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateDialogOpen(true)}
+            sx={{ textTransform: 'none', borderRadius: 2, py: 1, px: 3 }}
           >
-            Manage Users
-          </Button>
-        )}
-        <Button
-          variant="contained"
-          color="secondary"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateDialogOpen (true)}
-          sx={{textTransform: 'none', borderRadius: 2, py: 1, px:3}}>
             New Task
           </Button>
         </Box>
@@ -137,7 +139,7 @@ const ViewTasks: React.FC = () => {
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
         onTaskCreated={(newTask) => {
-          setTasks(prev => [newTask, ...prev] as Task[]);
+          setTasks((prev) => [newTask, ...prev] as Task[]);
         }}
         isAdmin={isAdmin}
       />
@@ -145,12 +147,7 @@ const ViewTasks: React.FC = () => {
       {loading ? (
         <Box sx={{ width: '100%' }}>
           {[...Array(5)].map((_, index) => (
-            <Skeleton 
-              key={index} 
-              variant="rectangular" 
-              height={56} 
-              sx={{ mb: 1 }} 
-            />
+            <Skeleton key={index} variant="rectangular" height={56} sx={{ mb: 1 }} />
           ))}
         </Box>
       ) : (
@@ -160,6 +157,7 @@ const ViewTasks: React.FC = () => {
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
           onLockTask={handleLockTask}
+          navigate={navigate}
         />
       )}
 
