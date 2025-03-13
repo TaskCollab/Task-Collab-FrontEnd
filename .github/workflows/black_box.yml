@@ -23,9 +23,6 @@ jobs:
             rm -rf node_modules
             npm install
             
-      - name: Build React app
-        run: npm run build
-
       - name: Start development server (background)
         run: npm start &
         env:
