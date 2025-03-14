@@ -9,7 +9,7 @@ import Login from './Pages/auth/Login.tsx';
 import Tasks from './Pages/tasks/ViewTasks.tsx';
 import TaskDetails from './Pages/tasks/TaskDetails.tsx'; // Import TaskDetails
 import ProtectedRoute from './Components/ProtectedRoute.tsx';
-import TicketsPage from './Pages/Landing/LandingPage.tsx';
+import Header from './Components/Header/Header';
 
 function App() {
   return (
@@ -17,12 +17,12 @@ function App() {
       <div className="App">
         <ToastContainer />
         <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Header />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/tasks" element={<Tasks />} />
-            <Route path="/Tasks" element={<Tasks />} />
+            <Route path="/home" element={<Tasks />} />
             <Route path="/" element={<Login />} />
-            <Route path="/home" element={<TicketsPage />} />
             <Route path="/tasks/:taskId" element={<TaskDetails />} /> {/* Add TaskDetails route */}
 
             {/* Page that requires login (any logged-in user can access) */}

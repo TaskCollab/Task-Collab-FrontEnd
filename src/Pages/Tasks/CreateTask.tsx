@@ -34,7 +34,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
     const newErrors: Record<string, string> = {};
     if (!title.trim()) newErrors.title = 'Title is required';
     if (!dueDate) newErrors.dueDate = 'Due date is required';
-    if (!assignee) newErrors.assignee = 'Assignee is required';
+  //  if (!assignee) newErrors.assignee = 'Assignee is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -47,7 +47,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
         const newTask = await TaskAPI.createTask({
             taskTitle: title,
             description,
-            assignedTo: parseInt(assignee),
+            assignedTo: assignee,
             status: 'Open',
             priority, 
             deadline: dueDate?.toISOString() || new Date().toISOString()
@@ -57,7 +57,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
         ...newTask,
         id: newTask.id.toString(),
         title: newTask.taskTitle,
-        assignee: newTask.assignedTo.toString(),
+        assignee: newTask.assignedTo,
         dueDate: newTask.deadline.split('T')[0],
         locked: false
       });
@@ -134,8 +134,9 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
             required
           >
             {/* Replace with actual user list from API */}
-            <MenuItem value="1">Kevin Zhang</MenuItem>
-            <MenuItem value="2">Vu Drudh</MenuItem>
+            <MenuItem value="admin_user">admin_user</MenuItem>
+            <MenuItem value="manager_user">manager_user</MenuItem>
+            <MenuItem value="employee_user">employee_user</MenuItem>
           </Select>
           {errors.assignee && <FormHelperText>{errors.assignee}</FormHelperText>}
         </FormControl>

@@ -3,15 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, Snackbar, SelectChangeEvent } from '@mui/material';
 import { TaskAPI } from '../../API/TasksAPICall';
 import { getTask, updateTask, deleteTask } from '../../API/TaskDetailsAPI'; // Adjust the path
+import { Description } from '@mui/icons-material';
 
 type Task = {
   id: string;
   title: string;
   assignee: string;
-  dueDate: string;
+  deadline: string;
   priority: 'High' | 'Medium' | 'Low';
   status: 'Open' | 'In Progress' | 'Completed';
-  locked: boolean;
+  description: string; // Added description
 };
 
 const TaskDetails: React.FC = () => {
@@ -27,15 +28,15 @@ const TaskDetails: React.FC = () => {
     const fetchTask = async () => {
       try {
         const data = await getTask(parseInt(taskId!));
-        if (data && data.task_Id !== undefined) { // Check if data.task_Id exists
+        if (data && data.id !== undefined) {
           const formattedTask = {
-            id: data.task_Id, // No toString() needed
+            id: data.id,
             title: data.taskTitle,
-            assignee: data.assigned_To.toString(),
-            dueDate: data.deadline.split('T')[0],
+            assignee: data.assignedTo.toString(),
+            deadline: data.deadline ? data.deadline.split('T')[0] : "No Due Date",
             priority: data.priority as 'High' | 'Medium' | 'Low',
             status: data.status as 'Open' | 'In Progress' | 'Completed',
-            locked: false,
+            description: data.description || "", // Added description
           };
           setTask(formattedTask);
           setEditedTask(formattedTask);
@@ -50,12 +51,11 @@ const TaskDetails: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     if (taskId) {
       fetchTask();
     }
   }, [taskId]);
-  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (editedTask) {
@@ -74,10 +74,11 @@ const TaskDetails: React.FC = () => {
       try {
         const updateData = {
           taskTitle: editedTask.title,
-          assignedTo: parseInt(editedTask.assignee),
-          deadline: `${editedTask.dueDate}T23:59:59`,
+          assignedTo: editedTask.assignee,
+          deadline: `${editedTask.deadline}T23:59:59`,
           status: editedTask.status,
           priority: editedTask.priority,
+          description: editedTask.description, // Added description
         };
         await updateTask(parseInt(editedTask.id), updateData);
         setTask(editedTask);
@@ -115,7 +116,8 @@ const TaskDetails: React.FC = () => {
         <>
           <TextField label="Title" name="title" value={editedTask?.title || ''} onChange={handleInputChange} fullWidth margin="normal" />
           <TextField label="Assignee" name="assignee" value={editedTask?.assignee || ''} onChange={handleInputChange} fullWidth margin="normal" />
-          <TextField label="Due Date" name="dueDate" type="date" value={editedTask?.dueDate || ''} onChange={handleInputChange} fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
+          <TextField label="Due Date" name="deadline" type="date" value={editedTask?.deadline || ''} onChange={handleInputChange} fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
+          <TextField label="Description" name="description" value={editedTask?.description || ''} onChange={handleInputChange} fullWidth margin="normal" multiline rows={4} />
 
           <FormControl fullWidth margin="normal">
             <InputLabel id="priority-select-label">Priority</InputLabel>
@@ -144,9 +146,10 @@ const TaskDetails: React.FC = () => {
         <>
           <Typography><strong>Title:</strong> {task.title}</Typography>
           <Typography><strong>Assignee:</strong> {task.assignee}</Typography>
-          <Typography><strong>Due Date:</strong> {task.dueDate}</Typography>
+          <Typography><strong>Due Date:</strong> {task.deadline}</Typography>
           <Typography><strong>Priority:</strong> {task.priority}</Typography>
           <Typography><strong>Status:</strong> {task.status}</Typography>
+          <Typography><strong>Description:</strong> {task.description}</Typography>
 
           <Box sx={{ mt: 2 }}>
             <Button variant="contained" onClick={() => setEditMode(true)} sx={{ mr: 1 }}>Edit</Button>
