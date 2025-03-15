@@ -53,7 +53,7 @@ const ViewTasks: React.FC = () => {
     try {
       const updateData = {
         taskTitle: updatedTask.title,
-        assignedTo: parseInt(updatedTask.assignee),
+        assignedTo: updatedTask.assignee,
         deadline: `${updatedTask.dueDate}T23:59:59`,
         status: updatedTask.status,
         priority: updatedTask.priority,

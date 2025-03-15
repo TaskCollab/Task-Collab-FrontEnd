@@ -6,8 +6,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import Login from './Pages/auth/Login.tsx';
-import Tasks from './Pages/tasks/ViewTasks.tsx';
-import TaskDetails from './Pages/tasks/TaskDetails.tsx'; // Import TaskDetails
+import Tasks from './Pages/Tasks/ViewTasks';
+import TaskDetails from './Pages/Tasks/TaskDetails'; // Import TaskDetails
 import ProtectedRoute from './Components/ProtectedRoute.tsx';
 import TicketsPage from './Pages/Landing/LandingPage.tsx';
 
