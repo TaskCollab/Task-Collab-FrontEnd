@@ -1,4 +1,4 @@
-name: React CI/CD with Cypress E2E
+name: React CI/CD with Cypress E2E (Development)
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  build_and_test:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest # Or windows-latest if you prefer
 
     steps:
       - name: Checkout code
@@ -16,22 +16,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Or your desired Node.js version
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build React app
-        run: npm run build
-
       - name: Start development server (background)
         run: npm start &
         env:
-          PORT: 3000 # Ensure the server starts on a specific port
+          PORT: 3000
 
       - name: Wait for development server to start
-        run: |
-          npx wait-on http://localhost:3000
+        run: npx wait-on http://localhost:3000
 
       - name: Install Cypress
         run: npx cypress install
@@ -41,4 +37,4 @@ jobs:
 
       - name: Stop development server
         if: ${{ always() }}
-        run: pkill -f "npm start"
+        run: pkill -f "npm start" # or taskkill /F /IM node.exe for windows.

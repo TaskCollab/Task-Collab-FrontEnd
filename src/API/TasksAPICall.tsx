@@ -32,27 +32,32 @@ export const TaskAPI = {
   },
 
   createTask: async (taskData: TaskDTO) => {
-    try{
-      const response = await taskApiClient.post('/tasks', taskData);
+    const token = localStorage.getItem("authToken");
+    try {
+      const response = await axios.post(TASK_API_URL + "create", taskData, { // TASK_API_URL is the base URL
+          headers: {
+              Authorization: `Bearer ${token}`, // Add the Authorization header
+          },
+      });
       return response.data;
-    }catch (error){
-      handleApiError(error);
+  } catch (error) {
+      console.error("Error in createTask API call", error);
       throw error;
-    }
-  },
+  }
+},
 
   getTask: async (id: number) => {
-    const response = await taskApiClient.get(`/tasks/${id}`);
+    const response = await taskApiClient.get(`${id}`);
     return response.data;
   },
 
   updateTask: async (id: number, taskData: Partial<TaskDTO>) => {
-    const response = await taskApiClient.put(`/tasks/${id}`, taskData);
+    const response = await taskApiClient.put(`/update/${id}`, taskData);
     return response.data;
   },
 
   deleteTask: async (id: number) => {
-    const response = await taskApiClient.delete(`/tasks/${id}`);
+    const response = await taskApiClient.delete(`delete/${id}`);
     return response.data;
   }
 };
@@ -60,7 +65,7 @@ export const TaskAPI = {
 interface TaskDTO {
   taskTitle: string;
   description: string;
-  assignedTo: number;
+  assignedTo: string;
   status: string;
   priority: string;
   deadline: string;
