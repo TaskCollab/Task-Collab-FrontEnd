@@ -66,3 +66,5 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/a
 This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
 ### Testing
+
+The testing is done by cypress, this section has mmoved here: [https://www.cypress.io/]
