@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
-import CreateTask from '../../Pages/tasks/CreateTask'; // Import your CreateTask component
+import CreateTask from '../../Pages/Tasks/CreateTask'; // Import your CreateTask component
 import { createTask } from '../../API/HeaderAPICall'; // Assuming you still need createTask
 
 
