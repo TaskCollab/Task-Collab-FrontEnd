@@ -23,8 +23,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        run: npm start
+      - name: Start development server (background)
+        run: npm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for development server to start
+        run: npx wait-on http://localhost:3000
         
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
