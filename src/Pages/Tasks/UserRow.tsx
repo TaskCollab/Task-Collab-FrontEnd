@@ -2,7 +2,6 @@ import React from 'react';
 import { TableRow, TableCell, Select, MenuItem, IconButton, SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-// Assume RoleType and UserType are defined elsewhere
 interface RoleType {
   roleId: number;
   roleName: string;
@@ -23,7 +22,7 @@ interface UserRowProps {
 
 const UserRow: React.FC<UserRowProps> = ({ user, roles, onUpdateRole, onDelete }) => {
   const handleRoleChange = (event: SelectChangeEvent<number>) => {
-    const newRoleId = Number(event.target.value); // Ensure conversion to number
+    const newRoleId = Number(event.target.value);
     onUpdateRole(user.userId, newRoleId);
   };
 

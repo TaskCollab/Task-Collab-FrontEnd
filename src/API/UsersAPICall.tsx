@@ -1,28 +1,62 @@
-import axios from 'axios';
+import axios from "axios";
+import { TASK_API_URL } from "../Utils/Constants";
 
-interface RoleType {
-  roleId: number;
-  roleName: string;
-}
-interface UserType {
-  userId: number;
+export const UsersAPI = {
+  getAllUsers: async () => {
+    const token = localStorage.getItem("authToken");
+    const response = await axios.get(`${TASK_API_URL}/users`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  createUser: async (userData: { 
+    username: string; 
+    password: string;
+    role: string 
+  }) => {
+    const token = localStorage.getItem("authToken");
+    const response = await axios.post(`${TASK_API_URL}/users/create`, userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  updateUserRole: async (userId: string, newRole: string) => {
+    const token = localStorage.getItem("authToken");
+    const response = await axios.put(
+      `${TASK_API_URL}/users/${userId}/role`,
+      { roleName: newRole }, // Match Java DTO structure
+      {
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        }
+      }
+    );
+    return response.data;
+  },
+
+  deleteUser: async (userId: string) => {
+    const token = localStorage.getItem("authToken");
+    await axios.delete(`${TASK_API_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+};
+
+export interface UserDTO {
+  userId: string;
   username: string;
+  role: string;
   isAdmin?: boolean;
-  role: RoleType;
 }
 
-const API_BASE_URL = '/api';
-
-export const getUsers = async (): Promise<UserType[]> => {
-  const response = await axios.get(`${API_BASE_URL}/users`);
-  return response.data;
-};
-
-export const updateUserRole = async (userId: number, roleId: number): Promise<void> => {
-//since back-end does not have end API yet, I willk just do a place holder here.
-  await axios.put(`${API_BASE_URL}/users/${userId}/role`, { roleId });
-};
-
-export const deleteUser = async (userId: number): Promise<void> => {
-  await axios.delete(`${API_BASE_URL}/users/${userId}`);
-};
+export interface RoleDTO {
+  roleName: string;
+  permissions?: {
+    create: boolean;
+    read: boolean;
+    update: boolean;
+    delete: boolean;
+  };
+}

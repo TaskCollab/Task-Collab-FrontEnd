@@ -1,45 +1,67 @@
 import React from 'react';
-import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper } from '@mui/material';
-import UserRow from './UserRow';
+import {
+  Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, Select, MenuItem,
+  Button
+} from '@mui/material';
 
-interface RoleType {
-  roleId: number;
-  roleName: string;
-}
-interface UserType {
-  userId: number;
+interface User {
+  userId: string;
   username: string;
-  isAdmin?: boolean;
-  role: RoleType;
+  role: string;
+  isAdmin: boolean;
 }
 
 interface UsersTableProps {
-  users: UserType[];
-  roles: RoleType[];
-  onUpdateRole: (userId: number, newRoleId: number) => void;
-  onDelete: (userId: number) => void;
+  users: User[];
+  roles: string[];
+  onUpdateRole: (userId: string, newRole: string) => void;
+  onDelete: (userId: string) => void;
 }
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, roles, onUpdateRole, onDelete }) => {
+const UsersTable: React.FC<UsersTableProps> = ({ 
+  users, 
+  roles,
+  onUpdateRole,
+  onDelete 
+}) => {
   return (
     <TableContainer component={Paper}>
-      <Table size="small">
+      <Table>
         <TableHead>
           <TableRow>
-            <TableCell><strong>Username</strong></TableCell>
-            <TableCell><strong>Role</strong></TableCell>
-            <TableCell align="right"><strong>Actions</strong></TableCell>
+            <TableCell>Username</TableCell>
+            <TableCell>Current Role</TableCell>
+            <TableCell>Admin Status</TableCell>
+            <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {users.map(user => (
-            <UserRow 
-              key={user.userId} 
-              user={user} 
-              roles={roles} 
-              onUpdateRole={onUpdateRole} 
-              onDelete={onDelete} 
-            />
+            <TableRow key={user.userId}>
+              <TableCell>{user.username}</TableCell>
+              <TableCell>
+                <Select
+                  value={user.role}
+                  onChange={(e) => onUpdateRole(user.userId, e.target.value)}
+                >
+                  {roles.map(role => (
+                    <MenuItem key={role} value={role}>
+                      {role}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </TableCell>
+              <TableCell>{user.isAdmin ? 'Yes' : 'No'}</TableCell>
+              <TableCell>
+                <Button 
+                  color="error"
+                  onClick={() => onDelete(user.userId)}
+                >
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>
