@@ -86,7 +86,6 @@ const TasksTable: React.FC<TasksTableProps> = ({
                 <TableCell>
                   <TaskRow
                     task={task}
-                    isAdmin={isAdmin}
                     onUpdate={onUpdateTask}
                     onDelete={onDeleteTask}
                     onLock={onLockTask}
