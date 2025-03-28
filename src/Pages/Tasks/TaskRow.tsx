@@ -5,10 +5,10 @@ import {
   TextField,
   Select,
   MenuItem,
-  Button,
   IconButton,
 } from '@mui/material';
 import { Edit, Delete, Lock, LockOpen, Save, Cancel } from '@mui/icons-material';
+import usePermissions from '../../Utils/usePermissions'; // Import your permissions hook
 
 interface Task {
   id: string;
@@ -22,21 +22,15 @@ interface Task {
 
 interface TaskRowProps {
   task: Task;
-  isAdmin: boolean;
   onUpdate: (updatedTask: Task) => void;
   onDelete: (taskId: string) => void;
   onLock: (taskId: string) => void;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({
-  task,
-  isAdmin,
-  onUpdate,
-  onDelete,
-  onLock,
-}) => {
+const TaskRow: React.FC<TaskRowProps> = ({ task, onUpdate, onDelete, onLock }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState<Task>({ ...task });
+  const permissions: string[] = usePermissions();
 
   const handleChange = (field: keyof Task, value: string) => {
     setEditedTask((prev) => ({ ...prev, [field]: value }));
@@ -121,22 +115,28 @@ const TaskRow: React.FC<TaskRowProps> = ({
       <TableCell>
         {isEditing ? (
           <>
-            <IconButton onClick={saveChanges} color="primary">
-              <Save />
-            </IconButton>
+            {permissions.includes('UPDATE') && (
+              <IconButton onClick={saveChanges} color="primary">
+                <Save />
+              </IconButton>
+            )}
             <IconButton onClick={cancelEdit} color="secondary">
               <Cancel />
             </IconButton>
           </>
         ) : (
           <>
-            <IconButton onClick={() => setIsEditing(true)} color="primary">
-              <Edit />
-            </IconButton>
-            <IconButton onClick={() => onDelete(task.id)} color="secondary">
-              <Delete />
-            </IconButton>
-            {isAdmin && (
+            {permissions.includes('UPDATE') && (
+              <IconButton onClick={() => setIsEditing(true)} color="primary">
+                <Edit />
+              </IconButton>
+            )}
+            {permissions.includes('DELETE') && (
+              <IconButton onClick={() => onDelete(task.id)} color="secondary">
+                <Delete />
+              </IconButton>
+            )}
+            {permissions.includes('ADMIN') && (
               <IconButton onClick={() => onLock(task.id)} color="default">
                 {task.locked ? <Lock /> : <LockOpen />}
               </IconButton>

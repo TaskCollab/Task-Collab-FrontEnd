@@ -13,6 +13,8 @@ import {
 import { DatePicker } from '@mui/x-date-pickers';
 import { TaskAPI } from '../../API/TasksAPICall';
 import { Task } from '../../API/TasksAPICall';
+import usePermissions from '../../Utils/usePermissions';
+import { toast } from 'react-toastify';
 
 interface CreateTaskProps {
   open: boolean;
@@ -29,6 +31,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
   const [assignee, setAssignee] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const permissions: string[] = usePermissions();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -40,6 +43,13 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
   };
 
   const handleSubmit = async () => {
+
+    if(!permissions.includes("CREATE")) {
+      toast.error("You do not have permission to create tickets");
+      return;
+    }
+
+
     if (!validateForm()) return;
 
     setLoading(true);
