@@ -34,7 +34,6 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
     const newErrors: Record<string, string> = {};
     if (!title.trim()) newErrors.title = 'Title is required';
     if (!dueDate) newErrors.dueDate = 'Due date is required';
-  //  if (!assignee) newErrors.assignee = 'Assignee is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

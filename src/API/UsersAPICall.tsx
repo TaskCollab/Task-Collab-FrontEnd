@@ -26,12 +26,8 @@ export const UsersAPI = {
     const token = localStorage.getItem("authToken");
     const response = await axios.put(
       `${TASK_API_URL}/users/${userId}/role`,
-      { roleName: newRole }, // Match Java DTO structure
-      {
-        headers: { 
-          Authorization: `Bearer ${token}` 
-        }
-      }
+      { roleName: newRole },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
   },
@@ -39,6 +35,30 @@ export const UsersAPI = {
   deleteUser: async (userId: string) => {
     const token = localStorage.getItem("authToken");
     await axios.delete(`${TASK_API_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  //newly added Role Management
+  getAllRoles: async () => {
+    const token = localStorage.getItem("authToken");
+    const response = await axios.get(`${TASK_API_URL}/roles`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  createRole: async (roleData: { roleName: string, permissions: object }) => {
+    const token = localStorage.getItem("authToken");
+    const response = await axios.post(`${TASK_API_URL}/roles/create`, roleData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  deleteRole: async (roleName: string) => {
+    const token = localStorage.getItem("authToken");
+    await axios.delete(`${TASK_API_URL}/roles/${roleName}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
   }

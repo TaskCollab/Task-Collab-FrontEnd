@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField } from '@mui/material';
+import { Box, Typography, TextField, Button } from '@mui/material';
 import UsersTable from './UsersTable';
 import GenericModal from '../../Components/Modal/GenericModal';
 import { UsersAPI } from '../../API/UsersAPICall';
 import { UserDTO } from '../../API/UsersAPICall';
+import RoleManagementModal from './RoleManagementModal';
+import AddIcon from '@mui/icons-material/Add';
+import ManageRolesIcon from '@mui/icons-material/AssignmentInd';
 
 interface RoleType {
   roleName: string;
@@ -24,12 +27,17 @@ const ManageUsers: React.FC = () => {
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [userToDelete, setUserToDelete] = useState<UserType | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [roleManagementOpen, setRoleManagementOpen] = useState(false);
+  const [createUserOpen, setCreateUserOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersData = await UsersAPI.getAllUsers();
-        
+        const [usersData, rolesData] = await Promise.all([
+          UsersAPI.getAllUsers(),
+          UsersAPI.getAllRoles()
+        ]);
+
         const formattedUsers = usersData.map((user: UserDTO) => ({
           userId: user.userId.toString(),
           username: user.username,
@@ -39,14 +47,8 @@ const ManageUsers: React.FC = () => {
   
         setUsers(formattedUsers);
         setFilteredUsers(formattedUsers);
-        const uniqueRoles = Array.from(
-          new Set<string>(
-            formattedUsers.map((u: { role: { roleName: string } }) => u.role.roleName)
-          )
-        );        
-        setRoles(uniqueRoles);
-        
-      } catch (error) {
+        setRoles(rolesData.map((r: any)=>r.roleName ));
+       } catch (error) {
         setError('Failed to load users');
         console.error('Failed to fetch users:', error);
       }
@@ -101,6 +103,25 @@ const ManageUsers: React.FC = () => {
         Manage Users
       </Typography>
       
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <Button
+          variant="contained"
+          startIcon={<ManageRolesIcon />}
+          onClick={() => setRoleManagementOpen(true)}
+          sx={{ textTransform: 'none' }}
+        >
+          Manage Roles
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setCreateUserOpen(true)}
+          sx={{ textTransform: 'none' }}
+        >
+          New User
+        </Button>
+      </Box>
+
       <TextField 
         label="Search Users" 
         variant="outlined" 
@@ -115,6 +136,11 @@ const ManageUsers: React.FC = () => {
         roles={roles} 
         onUpdateRole={handleUpdateRole} 
         onDelete={handleDeleteClick} 
+      />
+
+      <RoleManagementModal 
+        open={roleManagementOpen}
+        onClose={() => setRoleManagementOpen(false)}
       />
 
       <GenericModal
