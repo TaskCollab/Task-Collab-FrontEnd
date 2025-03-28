@@ -10,6 +10,7 @@ import Tasks from './Pages/Tasks/ViewTasks';
 import TaskDetails from './Pages/Tasks/TaskDetails'; // Import TaskDetails
 import ProtectedRoute from './Components/ProtectedRoute.tsx';
 import Header from './Components/Header/Header';
+import ManageUsers from './Pages/Tasks/ManageUsers';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/home" element={<Tasks />} />
             <Route path="/" element={<Login />} />
+            <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/tasks/:taskId" element={<TaskDetails />} /> {/* Add TaskDetails route */}
 
             {/* Page that requires login (any logged-in user can access) */}
