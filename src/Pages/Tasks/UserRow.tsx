@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {memo} from 'react';
 import { TableRow, TableCell, Select, MenuItem, IconButton, SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+
 
 interface RoleType {
   roleId: number;
@@ -56,4 +57,9 @@ const UserRow: React.FC<UserRowProps> = ({ user, roles, onUpdateRole, onDelete }
   );
 };
 
-export default UserRow;
+export default memo(UserRow, (prevProps, nextProps) => {
+  return prevProps.user.role.roleId === nextProps.user.role.roleId &&
+         prevProps.roles === nextProps.roles;
+}); //code refactoring
+
+//i have implement memoization for code refactoring, improve perfoemances.
