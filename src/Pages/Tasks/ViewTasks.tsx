@@ -6,6 +6,7 @@ import TasksTable from './TasksTable';
 import { TaskAPI } from '../../API/TasksAPICall';
 import CreateTask from './CreateTask';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 type Task = {
   id: string;
@@ -113,11 +114,14 @@ const ViewTasks: React.FC = () => {
             <Button
               variant="contained"
               startIcon={<GroupIcon />}
+              component={Link}
+              to="/manage-users"
               sx={{
                 textTransform: 'none',
                 borderRadius: 2,
                 py: 1,
                 px: 3,
+                mr: 2,
               }}
             >
               Manage Users
