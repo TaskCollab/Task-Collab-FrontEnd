@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, Snackbar, SelectChangeEvent } from '@mui/material';
 import { TaskAPI } from '../../API/TasksAPICall';
-import { getTask, updateTask, deleteTask } from '../../API/TaskDetailsAPI'; // Adjust the path
-import { Description } from '@mui/icons-material';
+import { getTask, updateTask, deleteTask } from '../../API/TaskDetailsAPI';
+
 
 type Task = {
   id: string;
@@ -12,7 +12,7 @@ type Task = {
   deadline: string;
   priority: 'High' | 'Medium' | 'Low';
   status: 'Open' | 'In Progress' | 'Completed';
-  description: string; // Added description
+  description: string;
 };
 
 const TaskDetails: React.FC = () => {
@@ -36,7 +36,7 @@ const TaskDetails: React.FC = () => {
             deadline: data.deadline ? data.deadline.split('T')[0] : "No Due Date",
             priority: data.priority as 'High' | 'Medium' | 'Low',
             status: data.status as 'Open' | 'In Progress' | 'Completed',
-            description: data.description || "", // Added description
+            description: data.description || "",
           };
           setTask(formattedTask);
           setEditedTask(formattedTask);
@@ -78,7 +78,7 @@ const TaskDetails: React.FC = () => {
           deadline: `${editedTask.deadline}T23:59:59`,
           status: editedTask.status,
           priority: editedTask.priority,
-          description: editedTask.description, // Added description
+          description: editedTask.description,
         };
         await updateTask(parseInt(editedTask.id), updateData);
         setTask(editedTask);

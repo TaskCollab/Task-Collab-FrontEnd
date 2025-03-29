@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 
 interface User {
-  userId: string;
+  userId: number;
   username: string;
   role: string;
   isAdmin: boolean;
@@ -15,8 +15,8 @@ interface User {
 interface UsersTableProps {
   users: User[];
   roles: string[];
-  onUpdateRole: (userId: string, newRole: string) => void;
-  onDelete: (userId: string) => void;
+  onUpdateRole: (userId: number, newRole: string) => void;
+  onDelete: (userId: number) => void;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ 

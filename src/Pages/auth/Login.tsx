@@ -36,7 +36,7 @@ const Login = () => {
       setMessage('Login successful!');
       setIsError(false);
       setOpenSnackbar(true);
-      navigate('/home'); // Redirect to /home after successful login
+      navigate('/home');
     } catch (error) {
       let errorMessage = 'An error occurred during login';
       if (axios.isAxiosError(error)) {
