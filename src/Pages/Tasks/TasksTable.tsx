@@ -11,7 +11,6 @@ import {
   IconButton,
 } from '@mui/material';
 import TaskRow from './TaskRow';
-import { useNavigate } from 'react-router-dom';
 
 interface Task {
   id: string;

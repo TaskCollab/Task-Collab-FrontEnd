@@ -7,22 +7,23 @@ import { UserDTO } from '../../API/UsersAPICall';
 import RoleManagementModal from './RoleManagementModal';
 import AddIcon from '@mui/icons-material/Add';
 import ManageRolesIcon from '@mui/icons-material/AssignmentInd';
-
-interface RoleType {
-  roleName: string;
-}
+import CreateUserDialog from './CreateUserDialog';
 
 interface UserType {
-  userId: string;
+  userId: number;
   username: string;
-  isAdmin: boolean; 
+  isAdmin: boolean;
   role: string;
+}
+interface RoleType {
+  roleId: number;
+  roleName: string;
 }
 
 const ManageUsers: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [roles, setRoles] = useState<RoleType[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [userToDelete, setUserToDelete] = useState<UserType | null>(null);
@@ -39,16 +40,21 @@ const ManageUsers: React.FC = () => {
         ]);
 
         const formattedUsers = usersData.map((user: UserDTO) => ({
-          userId: user.userId.toString(),
+          userId: Number(user.userId),
           username: user.username,
           isAdmin: user.role === 'ADMIN',
           role: user.role
         }));
-  
+
+        const formattedRoles = rolesData.map((role: any) => ({
+          roleId: role.roleId,
+          roleName: role.roleName
+        }));
+
         setUsers(formattedUsers);
         setFilteredUsers(formattedUsers);
-        setRoles(rolesData.map((r: any)=>r.roleName ));
-       } catch (error) {
+        setRoles(formattedRoles);
+      } catch (error) {
         setError('Failed to load users');
         console.error('Failed to fetch users:', error);
       }
@@ -66,37 +72,72 @@ const ManageUsers: React.FC = () => {
     );
   };
 
-  const handleUpdateRole = async (userId: string, newRoleName: string) => {
+  const handleCreateUser = async (userData: { 
+    username: string; 
+    password: string; 
+    role: number 
+  }) => {
     try {
-      await UsersAPI.updateUserRole(userId, newRoleName);
-      setUsers (prevUsers => prevUsers.map(u => u.userId === userId ? { ...u, role: newRoleName } : u ));
+      const createdUser = await UsersAPI.createUser({
+        username: userData.username,
+        password: userData.password,
+        role: roles.find(r => r.roleId === userData.role)?.roleName || ''
+      });
+
+      setUsers(prev => [...prev, {
+        userId: Number(createdUser.userId),
+        username: createdUser.username,
+        isAdmin: createdUser.role === 'ADMIN',
+        role: createdUser.role
+      }]);
+      
+      setCreateUserOpen(false);
     } catch (error) {
-      setError('Failed to update user role');
-      console.error('Failed to update user role:', error);
+      setError('Failed to create user');
+      console.error('User creation failed:', error);
     }
   };
 
-  const handleDeleteClick = (userId: string) => {
+  const handleUpdateRole = async (userId: number, newRoleName: string) => {
+    try {
+      const allRoles = await UsersAPI.getAllRoles();
+      const targetRole = allRoles.find(role => role.roleName === newRoleName);
+      if (!targetRole) throw new Error("Role not found");
+      
+      await UsersAPI.updateUserRole(userId.toString(), targetRole);
+      
+      const updatedUsers = await UsersAPI.getAllUsers();
+      setUsers(updatedUsers.map((u: UserDTO) => ({
+        userId: Number(u.userId),
+        username: u.username,
+        isAdmin: u.role === 'ADMIN',
+        role: u.role
+      })));
+    } catch (error) {
+      console.error("Failed to update role:", error);
+    }
+  };
+
+  const handleDeleteClick = (userId: number) => {
     const user = users.find(u => u.userId === userId) || null;
     setUserToDelete(user);
     setConfirmOpen(true);
   };
-
   const handleConfirmDelete = async () => {
     if (!userToDelete) return;
     try {
-      await UsersAPI.deleteUser(userToDelete.userId);
-      setUsers(prev => prev.filter(u => u.userId !== userToDelete.userId));
+      await UsersAPI.deleteUser(userToDelete.userId.toString());
+      setUsers(prev => prev.filter(u => u.userId !== userToDelete.userId)); 
       setFilteredUsers(prev => prev.filter(u => u.userId !== userToDelete.userId));
     } catch (error) {
       setError('Failed to delete user');
-      console.error('Failed to delete user:', error);
+      console.error('Failed to delete user', error);
     } finally {
       setConfirmOpen(false);
       setUserToDelete(null);
     }
   };
-
+  const formattedRolesForTable = roles.map(r => r.roleName);
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h5" gutterBottom>
@@ -122,6 +163,13 @@ const ManageUsers: React.FC = () => {
         </Button>
       </Box>
 
+      <CreateUserDialog
+        open={createUserOpen}
+        onClose={() => setCreateUserOpen(false)}
+        onCreate={handleCreateUser}
+        roles={roles}
+      />
+
       <TextField 
         label="Search Users" 
         variant="outlined" 
@@ -133,10 +181,10 @@ const ManageUsers: React.FC = () => {
 
       <UsersTable 
         users={filteredUsers} 
-        roles={roles} 
+        roles={formattedRolesForTable}
         onUpdateRole={handleUpdateRole} 
         onDelete={handleDeleteClick} 
-      />
+      />  
 
       <RoleManagementModal 
         open={roleManagementOpen}

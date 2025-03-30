@@ -1,10 +1,10 @@
 import axios from "axios";
-import { TASK_API_URL } from "../Utils/Constants";
+import { ROLE_API_URL, TASK_API_URL, USER_API_URL } from "../Utils/Constants";
 
 export const UsersAPI = {
   getAllUsers: async () => {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(`${TASK_API_URL}/users`, {
+    const response = await axios.get(`${USER_API_URL}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -16,25 +16,30 @@ export const UsersAPI = {
     role: string 
   }) => {
     const token = localStorage.getItem("authToken");
-    const response = await axios.post(`${TASK_API_URL}/users/create`, userData, {
+    const response = await axios.post(`${USER_API_URL}/create`, userData, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
   },
 
-  updateUserRole: async (userId: string, newRole: string) => {
+  updateUserRole: async (userId: string, roleData: RoleDTO) => {
     const token = localStorage.getItem("authToken");
     const response = await axios.put(
-      `${TASK_API_URL}/users/${userId}/role`,
-      { roleName: newRole },
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${USER_API_URL}/${userId}/role`,
+      roleData,
+      { 
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json" 
+        } 
+      }
     );
     return response.data;
   },
 
   deleteUser: async (userId: string) => {
     const token = localStorage.getItem("authToken");
-    await axios.delete(`${TASK_API_URL}/users/${userId}`, {
+    await axios.delete(`${USER_API_URL}users/${userId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
@@ -42,15 +47,15 @@ export const UsersAPI = {
   //newly added Role Management
   getAllRoles: async () => {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(`${TASK_API_URL}/roles`, {
+    const response = await axios.post(`${ROLE_API_URL}search`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return response.data;
+    return response.data as RoleDTO[];
   },
 
   createRole: async (roleData: { roleName: string, permissions: object }) => {
     const token = localStorage.getItem("authToken");
-    const response = await axios.post(`${TASK_API_URL}/roles/create`, roleData, {
+    const response = await axios.post(`${ROLE_API_URL}/create`, roleData, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -58,25 +63,25 @@ export const UsersAPI = {
 
   deleteRole: async (roleName: string) => {
     const token = localStorage.getItem("authToken");
-    await axios.delete(`${TASK_API_URL}/roles/${roleName}`, {
+    await axios.delete(`${ROLE_API_URL}${roleName}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
   }
 };
 
 export interface UserDTO {
-  userId: string;
+  userId: number;
   username: string;
   role: string;
   isAdmin?: boolean;
 }
 
 export interface RoleDTO {
+  permissions: { create: false; read: false; update: false; delete: false; };
+  roleId: number; 
   roleName: string;
-  permissions?: {
-    create: boolean;
-    read: boolean;
-    update: boolean;
-    delete: boolean;
-  };
+  createPermission: boolean;
+  readPermission: boolean;
+  updatePermission: boolean;
+  deletePermission: boolean;
 }
