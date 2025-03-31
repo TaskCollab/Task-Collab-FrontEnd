@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, Checkbox, FormControlLabel
 } from '@mui/material';
 import { UsersAPI } from '../../API/UsersAPICall';
+import { RoleDTO } from '../../API/UsersAPICall';
+import { convertRoleDTO, Role } from '../Landing/roleTypes';
 
-interface Role {
-  roleName: string;
-  permissions: {
-    create: boolean;
-    read: boolean;
-    update: boolean;
-    delete: boolean;
-  };
-}
 
-const RoleManagementModal: React.FC<{ 
+const RoleManagementModal: React.FC<{
   open: boolean;
   onClose: () => void;
 }> = ({ open, onClose }) => {
@@ -29,20 +22,22 @@ const RoleManagementModal: React.FC<{
     deletePermission: true,
   });
 
+  const fetchRoles = useCallback(async () => {
+    try {
+      const data = await UsersAPI.getAllRoles();
+      setRoles(data.map(convertRoleDTO));
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const data = await UsersAPI.getAllRoles();
-        setRoles(data);
-      } catch (error) {
-        console.error('Error fetching roles:', error);
-      }
-    };
-    if(open) fetchRoles();
-  }, [open]);
+    if (open) fetchRoles();
+  }, [open, fetchRoles]);
 
   const handleCreateRole = async () => {
-    if (!newRoleName) return;
+    if (!newRoleName.trim()) return;
+
     try {
       const roleDTO = {
         roleName: newRoleName,
@@ -63,9 +58,26 @@ const RoleManagementModal: React.FC<{
     }
   };
 
+  const handleDeleteRole = async (roleName: string) => {
+    try {
+      await UsersAPI.deleteRole(roleName);
+      setRoles(prev => prev.filter(r => r.roleName !== roleName));
+    } catch (error) {
+      console.error('Error deleting role:', error);
+    }
+  };
+
+  const renderPermissions = (permissions: Role['permissions']) => {
+    return Object.entries(permissions)
+      .filter(([_, value]) => value)
+      .map(([perm]) => perm)
+      .join(', ') || 'No permissions';
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Role Management</DialogTitle>
+
       <DialogContent>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
           <TextField
@@ -116,8 +128,8 @@ const RoleManagementModal: React.FC<{
                       .map(([perm]) => perm).join(', ')}
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      color="error" 
+                    <Button
+                      color="error"
                       onClick={async () => {
                         await UsersAPI.deleteRole(role.roleName);
                         setRoles(prev => prev.filter(r => r.roleName !== role.roleName));
@@ -132,6 +144,7 @@ const RoleManagementModal: React.FC<{
           </Table>
         </TableContainer>
       </DialogContent>
+
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
