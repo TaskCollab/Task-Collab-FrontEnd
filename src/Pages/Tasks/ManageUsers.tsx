@@ -7,6 +7,7 @@ import { UserDTO } from '../../API/UsersAPICall';
 import RoleManagementModal from './RoleManagementModal';
 import AddIcon from '@mui/icons-material/Add';
 import ManageRolesIcon from '@mui/icons-material/AssignmentInd';
+import CreateUserDialog from './CreateUserDialogue'; // Corrected import path
 
 interface RoleType {
   roleName: string;
@@ -23,6 +24,7 @@ const ManageUsers: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
+  const [roleObjects, setRoleObjects] = useState<{ roleId: number; roleName: string }[]>([]); // New state for role objects
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [userToDelete, setUserToDelete] = useState<UserType | null>(null);
@@ -48,6 +50,7 @@ const ManageUsers: React.FC = () => {
         setUsers(formattedUsers);
         setFilteredUsers(formattedUsers);
         setRoles(rolesData.map((r: any)=>r.roleName ));
+        setRoleObjects(rolesData.map((r: any) => ({ roleId: r.roleId, roleName: r.roleName }))); // Set role objects
        } catch (error) {
         setError('Failed to load users');
         console.error('Failed to fetch users:', error);
@@ -94,6 +97,28 @@ const ManageUsers: React.FC = () => {
     } finally {
       setConfirmOpen(false);
       setUserToDelete(null);
+    }
+  };
+
+  const handleUserCreated = async (userData: { username: string; password: string; role: number },clearFields: () => void, ) => {
+    try {
+      await UsersAPI.createUser(userData); // Create the user via API
+
+      const usersData = await UsersAPI.getAllUsers(); // Refresh the user list
+      const formattedUsers = usersData.map((user: UserDTO) => ({
+        userId: user.userId.toString(),
+        username: user.username,
+        isAdmin: user.role === 'ADMIN',
+        role: user.role
+      }));
+
+      setUsers(formattedUsers);
+      setFilteredUsers(formattedUsers);
+      setCreateUserOpen(false); // Close the modal
+      clearFields(); // Clear the fields
+    } catch (error) {
+      setError('Failed to create user');
+      console.error('Failed to create user:', error);
     }
   };
 
@@ -149,6 +174,13 @@ const ManageUsers: React.FC = () => {
         message={`Are you sure you want to delete user "${userToDelete?.username}"?`}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
+      />
+
+      <CreateUserDialog // Use your CreateUserDialog component
+        open={createUserOpen}
+        onClose={() => setCreateUserOpen(false)}
+        onCreate={handleUserCreated} // Pass the modified handleUserCreated function
+        roles={roleObjects} // Pass the role objects
       />
 
       {error && (
