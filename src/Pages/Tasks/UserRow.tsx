@@ -28,10 +28,6 @@ const UserRow: React.FC<UserRowProps> = ({ user, roles, onUpdateRole, onDelete }
     onUpdateRole(user.userId, newRoleId);
   };
 
-  // Debugging logs to check values
-  console.log("user.role.roleId:", user.role.roleId);
-  console.log("roles:", roles);
-
   return (
     <TableRow hover key={user.userId}>
       <TableCell>{user.username}</TableCell>
