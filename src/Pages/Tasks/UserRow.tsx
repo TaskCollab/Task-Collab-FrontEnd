@@ -6,6 +6,7 @@ interface RoleType {
   roleId: number;
   roleName: string;
 }
+
 interface UserType {
   userId: number;
   username: string;
@@ -26,20 +27,27 @@ const UserRow: React.FC<UserRowProps> = ({ user, roles, onUpdateRole, onDelete }
     onUpdateRole(user.userId, newRoleId);
   };
 
+  // Debugging logs to check values
+  console.log("user.role.roleId:", user.role.roleId);
+  console.log("roles:", roles);
+
   return (
     <TableRow hover key={user.userId}>
       <TableCell>{user.username}</TableCell>
       <TableCell>
         <Select 
-          value={user.role.roleId} 
+          value={user.role.roleId}  // Ensure this is a number matching the roleId in the MenuItems
           onChange={handleRoleChange} 
           size="small"
         >
-          {roles.map(role => (
-            <MenuItem key={role.roleId} value={role.roleId}>
-              {role.roleName}
-            </MenuItem>
-          ))}
+          {roles.map(role => {
+            console.log("roles.map() role:", role);  // Log the role to check for duplicates
+            return (
+              <MenuItem key={role.roleId} value={role.roleId}>
+                {role.roleName}
+              </MenuItem>
+            );
+          })}
         </Select>
       </TableCell>
       <TableCell align="right">

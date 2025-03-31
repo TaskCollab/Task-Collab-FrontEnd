@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper
+  TableContainer, TableHead, TableRow, Paper, Checkbox, FormControlLabel
 } from '@mui/material';
 import { UsersAPI } from '../../API/UsersAPICall';
 
@@ -22,6 +22,12 @@ const RoleManagementModal: React.FC<{
 }> = ({ open, onClose }) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [newRoleName, setNewRoleName] = useState('');
+  const [newRolePermissions, setNewRolePermissions] = useState({
+    createPermission: true,
+    readPermission: true,
+    updatePermission: true,
+    deletePermission: true,
+  });
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -38,11 +44,18 @@ const RoleManagementModal: React.FC<{
   const handleCreateRole = async () => {
     if (!newRoleName) return;
     try {
-      await UsersAPI.createRole({
+      const roleDTO = {
         roleName: newRoleName,
-        permissions: { create: true, read: true, update: true, delete: true }
-      });
+        createPermission: newRolePermissions.createPermission,
+        readPermission: newRolePermissions.readPermission,
+        updatePermission: newRolePermissions.updatePermission,
+        deletePermission: newRolePermissions.deletePermission,
+      };
+
+      await UsersAPI.createRole(roleDTO);
+
       setNewRoleName('');
+      setNewRolePermissions({ createPermission: true, readPermission: true, updatePermission: true, deletePermission: true }); // Reset permissions
       const updatedRoles = await UsersAPI.getAllRoles();
       setRoles(updatedRoles);
     } catch (error) {
@@ -54,13 +67,31 @@ const RoleManagementModal: React.FC<{
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Role Management</DialogTitle>
       <DialogContent>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
           <TextField
             label="New Role Name"
             value={newRoleName}
             onChange={(e) => setNewRoleName(e.target.value)}
             fullWidth
           />
+          <div>
+            <FormControlLabel
+              control={<Checkbox checked={newRolePermissions.createPermission} onChange={(e) => setNewRolePermissions({ ...newRolePermissions, createPermission: e.target.checked })} />}
+              label="Create"
+            />
+            <FormControlLabel
+              control={<Checkbox checked={newRolePermissions.readPermission} onChange={(e) => setNewRolePermissions({ ...newRolePermissions, readPermission: e.target.checked })} />}
+              label="Read"
+            />
+            <FormControlLabel
+              control={<Checkbox checked={newRolePermissions.updatePermission} onChange={(e) => setNewRolePermissions({ ...newRolePermissions, updatePermission: e.target.checked })} />}
+              label="Update"
+            />
+            <FormControlLabel
+              control={<Checkbox checked={newRolePermissions.deletePermission} onChange={(e) => setNewRolePermissions({ ...newRolePermissions, deletePermission: e.target.checked })} />}
+              label="Delete"
+            />
+          </div>
           <Button variant="contained" onClick={handleCreateRole}>
             Create Role
           </Button>
@@ -80,7 +111,7 @@ const RoleManagementModal: React.FC<{
                 <TableRow key={role.roleName}>
                   <TableCell>{role.roleName}</TableCell>
                   <TableCell>
-                    {Object.entries(role.permissions)
+                    {role.permissions && Object.entries(role.permissions)
                       .filter(([_, value]) => value)
                       .map(([perm]) => perm).join(', ')}
                   </TableCell>

@@ -31,7 +31,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
         <TableHead>
           <TableRow>
             <TableCell>Username</TableCell>
-            <TableCell>Current Role</TableCell>
+            <TableCell>Update Role</TableCell>
             <TableCell>Admin Status</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
