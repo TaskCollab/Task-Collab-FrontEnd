@@ -35,7 +35,6 @@ export const UsersAPI = {
 
   updateUserRole: async (userId: string, newRole: string) => {
     const token = localStorage.getItem("authToken");
-    console.log("Updating user role", userId, newRole);
     const response = await axios.put(
       `${USER_API_URL}/${userId}/role`, 
       newRole,
