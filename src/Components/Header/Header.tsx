@@ -26,27 +26,23 @@ const Header: React.FC = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-
   const isAdmin = true; 
 
-  const getUserId = () => {
+  const getUserId = (): number | null => {
     const token = localStorage.getItem('authToken');
     if (!token) return null;
-    interface JwtPayload {
-      userId: string;
-    }
+    interface JwtPayload { userId: string }
     const decoded = jwtDecode<JwtPayload>(token);
-    return decoded.userId;
+    return decoded.userId ? Number(decoded.userId) : null;
   };
 
   const fetchNotifications = async () => {
     try {
       const userId = getUserId();
       if (!userId) return;
-      
-      const data = await NotificationAPI.getUnreadNotifications();
+      const data = await NotificationAPI.getNotifications(userId);
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.readStatus).length);
     } catch (error) {
@@ -64,8 +60,25 @@ const Header: React.FC = () => {
     setCreateDialogOpen(true);
   };
 
-  const handleNotificationOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleNotificationOpen = async (event: React.MouseEvent<HTMLElement>) => {
+    try {
+      const userId = getUserId();
+      if (userId) {
+        const allNotifications = await NotificationAPI.getNotifications(userId);
+        const unreadNotifications = allNotifications.filter(n => !n.readStatus);
+        if (unreadNotifications.length > 0) {
+          await Promise.all(unreadNotifications.map(n =>
+            NotificationAPI.markAsRead(n.notificationId)
+          ));
+        }
+        setNotifications(allNotifications.map(n => ({ ...n, readStatus: true })));
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Error opening notifications:', error);
+    } finally {
+      setAnchorEl(event.currentTarget);
+    }
   };
 
   const handleNotificationClose = () => {
@@ -74,13 +87,15 @@ const Header: React.FC = () => {
 
   const handleMarkAsRead = async (notificationId: number) => {
     try {
+      const notif = notifications.find(n => n.notificationId === notificationId);
+      if (!notif || notif.readStatus) {
+        return;
+      }
       await NotificationAPI.markAsRead(notificationId);
       setNotifications(prev => 
-        prev.map(n => 
-          n.notificationId === notificationId ? {...n, readStatus: true} : n
-        )
+        prev.map(n => n.notificationId === notificationId ? { ...n, readStatus: true } : n)
       );
-      setUnreadCount(prev => prev - 1);
+      setUnreadCount(prevCount => Math.max(prevCount - 1, 0));
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }

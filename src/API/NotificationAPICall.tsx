@@ -1,19 +1,20 @@
 import axios from "axios";
-import { USER_API_URL } from "../Utils/Constants";
-import { Notification } from '../Utils/NotificationTypes';
+import { NOTIFICATION_API_URL } from "../Utils/Constants";
+import { Notification } from "../Utils/NotificationTypes";
 
 export const NotificationAPI = {
-  getUnreadNotifications: async (): Promise<Notification[]> => {
+  getNotifications: async (userId: number): Promise<Notification[]> => {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(`${USER_API_URL}/notifications/user/unread`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await axios.get(`${NOTIFICATION_API_URL}/user/${userId}`, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return response.data;
   },
   markAsRead: async (notificationId: number): Promise<void> => {
     const token = localStorage.getItem("authToken");
-    await axios.put(`${USER_API_URL}/notifications/markAsRead/${notificationId}`, {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    await axios.put(`${NOTIFICATION_API_URL}/markAsRead/${notificationId}`, 
+      {}, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
   }
 };

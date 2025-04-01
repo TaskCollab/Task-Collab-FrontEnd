@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Skeleton, Snackbar } from '@mui/material';
+import { Box, Button, Typography, Skeleton, Snackbar, TextField } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import AddIcon from '@mui/icons-material/Add';
 import TasksTable from './TasksTable';
@@ -24,6 +24,8 @@ const ViewTasks: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +42,7 @@ const ViewTasks: React.FC = () => {
           locked: false,
         }));
         setTasks(formattedTasks);
+        setFilteredTasks(formattedTasks);
       } catch (error) {
         console.error('Error fetching tasks:', error);
         setError('Failed to load tasks');
@@ -49,6 +52,14 @@ const ViewTasks: React.FC = () => {
     };
     fetchTasks();
   }, []);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+    setFilteredTasks(
+      tasks.filter(task => task.title.toLowerCase().includes(query))
+    );
+  };
 
   const handleUpdateTask = async (updatedTask: Task) => {
     try {
@@ -60,7 +71,16 @@ const ViewTasks: React.FC = () => {
         priority: updatedTask.priority,
       };
       await TaskAPI.updateTask(parseInt(updatedTask.id), updateData);
-      setTasks((prev) => prev.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+      const updatedTaskList = tasks.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task
+      );
+      setTasks(updatedTaskList);
+      const loweredQuery = searchQuery.toLowerCase();
+      const filtered = loweredQuery
+        ? updatedTaskList.filter((task) =>
+            task.title.toLowerCase().includes(loweredQuery)
+          ) : updatedTaskList;
+      setFilteredTasks(filtered);
     } catch (error) {
       console.error('Error updating task:', error);
       setError('Failed to update task');
@@ -71,6 +91,7 @@ const ViewTasks: React.FC = () => {
     try {
       await TaskAPI.deleteTask(parseInt(taskId));
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
+      setFilteredTasks(prev => prev.filter(task => task.id !== taskId));
     } catch (error) {
       console.error('Error deleting task:', error);
       setError('Failed to delete task');
@@ -144,6 +165,9 @@ const ViewTasks: React.FC = () => {
         onClose={() => setCreateDialogOpen(false)}
         onTaskCreated={(newTask) => {
           setTasks((prev) => [newTask, ...prev] as Task[]);
+          if (searchQuery.trim() === '' || newTask.taskTitle.toLowerCase().includes(searchQuery)) {
+            setFilteredTasks(prev => [newTask, ...prev] as Task[]);
+          }
         }}
         isAdmin={isAdmin}
       />
@@ -155,15 +179,26 @@ const ViewTasks: React.FC = () => {
           ))}
         </Box>
       ) : (
+        <>
+        <TextField
+  label="Search Tasks"
+  variant="outlined"
+  size="small"
+  value={searchQuery}
+  onChange={handleSearchChange}
+  sx={{ mb: 2, width: '100%', maxWidth: 400 }}
+/>
         <TasksTable
-          tasks={tasks}
+          tasks={filteredTasks}
           isAdmin={isAdmin}
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
           onLockTask={handleLockTask}
           navigate={navigate}
         />
+    </>
       )}
+
 
       <Snackbar
         open={!!error}
