@@ -13,7 +13,12 @@ interface User {
 }
 
 interface UsersTableProps {
-  users: User[];
+  users: Array<{
+    userId: number;
+    username: string;
+    role: string;
+    isAdmin: boolean;
+  }>;
   roles: string[];
   onUpdateRole: (userId: number, newRole: string) => void;
   onDelete: (userId: number) => void;

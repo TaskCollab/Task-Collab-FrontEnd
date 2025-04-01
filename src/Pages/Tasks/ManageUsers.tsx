@@ -7,14 +7,14 @@ import { UserDTO } from '../../API/UsersAPICall';
 import RoleManagementModal from './RoleManagementModal';
 import AddIcon from '@mui/icons-material/Add';
 import ManageRolesIcon from '@mui/icons-material/AssignmentInd';
-import CreateUserDialog from './CreateUserDialogue'; // Corrected import path
+import CreateUserDialog from './CreateUserDialogue'; 
 
 interface RoleType {
   roleName: string;
 }
 
 interface UserType {
-  userId: string;
+  userId: number;
   username: string;
   isAdmin: boolean; 
   role: string;
@@ -41,7 +41,7 @@ const ManageUsers: React.FC = () => {
         ]);
 
         const formattedUsers = usersData.map((user: UserDTO) => ({
-          userId: user.userId.toString(),
+          userId: Number(user.userId),
           username: user.username,
           isAdmin: user.role === 'ADMIN',
           role: user.role
@@ -69,17 +69,19 @@ const ManageUsers: React.FC = () => {
     );
   };
 
-  const handleUpdateRole = async (userId: string, newRoleName: string) => {
+  const handleUpdateRole = async (userId: number, newRoleName: string) => {
     try {
-      await UsersAPI.updateUserRole(userId, newRoleName);
-      setUsers (prevUsers => prevUsers.map(u => u.userId === userId ? { ...u, role: newRoleName } : u ));
+      await UsersAPI.updateUserRole(userId.toString(), newRoleName);
+      setUsers(prevUsers => prevUsers.map(u =>u.userId === userId ? { ...u, role: newRoleName } : u
+        )
+      );
     } catch (error) {
       setError('Failed to update user role');
       console.error('Failed to update user role:', error);
     }
   };
 
-  const handleDeleteClick = (userId: string) => {
+  const handleDeleteClick = (userId: number) => {
     const user = users.find(u => u.userId === userId) || null;
     setUserToDelete(user);
     setConfirmOpen(true);
@@ -88,7 +90,7 @@ const ManageUsers: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (!userToDelete) return;
     try {
-      await UsersAPI.deleteUser(userToDelete.userId);
+      await UsersAPI.deleteUser(userToDelete.userId.toString());
       setUsers(prev => prev.filter(u => u.userId !== userToDelete.userId));
       setFilteredUsers(prev => prev.filter(u => u.userId !== userToDelete.userId));
     } catch (error) {

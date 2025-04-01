@@ -9,6 +9,7 @@
     "@mui/material": "^6.4.3",
     "@mui/styled-engine-sc": "^6.4.3",
     "@mui/x-date-pickers": "^7.27.3",
+    "@types/jwt-decode": "^2.2.1",
     "act-cli": "^0.0.2",
     "axios": "^1.7.9",
     "cra-template": "1.2.0",

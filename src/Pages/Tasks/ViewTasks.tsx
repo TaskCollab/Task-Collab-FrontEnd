@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Skeleton, Snackbar } from '@mui/material';
+import { Box, Button, Typography, Skeleton, Snackbar, TextField } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import AddIcon from '@mui/icons-material/Add';
 import TasksTable from './TasksTable';
 import { TaskAPI } from '../../API/TasksAPICall';
 import CreateTask from './CreateTask';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 type Task = {
   id: string;
@@ -20,6 +19,10 @@ type Task = {
 
 const ViewTasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [searchTitle, setSearchTitle] = useState<string>('');
+  const [searchAssignee, setSearchAssignee] = useState<string>('');
+  const [searchStatus, setSearchStatus] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +43,7 @@ const ViewTasks: React.FC = () => {
           locked: false,
         }));
         setTasks(formattedTasks);
+        setFilteredTasks(formattedTasks);
       } catch (error) {
         console.error('Error fetching tasks:', error);
         setError('Failed to load tasks');
@@ -49,6 +53,32 @@ const ViewTasks: React.FC = () => {
     };
     fetchTasks();
   }, []);
+
+  useEffect(() => {
+    const titleFilter = searchTitle.toLowerCase();
+    const assigneeFilter = searchAssignee.toLowerCase();
+    const statusFilter = searchStatus.toLowerCase();
+
+    const filtered = tasks.filter((task) =>
+      task.title.toLowerCase().includes(titleFilter) &&
+      task.assignee.toLowerCase().includes(assigneeFilter) &&
+      task.status.toLowerCase().includes(statusFilter)
+    );
+
+    setFilteredTasks(filtered);
+  }, [searchTitle, searchAssignee, searchStatus, tasks]);
+
+  const handleTitleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTitle(e.target.value);
+  };
+
+  const handleAssigneeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchAssignee(e.target.value);
+  };
+
+  const handleStatusSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchStatus(e.target.value);
+  };
 
   const handleUpdateTask = async (updatedTask: Task) => {
     try {
@@ -60,7 +90,9 @@ const ViewTasks: React.FC = () => {
         priority: updatedTask.priority,
       };
       await TaskAPI.updateTask(parseInt(updatedTask.id), updateData);
-      setTasks((prev) => prev.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+      setTasks((prev) =>
+        prev.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+      );
     } catch (error) {
       console.error('Error updating task:', error);
       setError('Failed to update task');
@@ -80,7 +112,9 @@ const ViewTasks: React.FC = () => {
   const handleLockTask = async (taskId: string) => {
     try {
       setTasks((prev) =>
-        prev.map((task) => (task.id === taskId ? { ...task, locked: !task.locked } : task))
+        prev.map((task) =>
+          task.id === taskId ? { ...task, locked: !task.locked } : task
+        )
       );
     } catch (error) {
       console.error('Error locking task:', error);
@@ -142,8 +176,17 @@ const ViewTasks: React.FC = () => {
       <CreateTask
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        onTaskCreated={(newTask) => {
-          setTasks((prev) => [newTask, ...prev] as Task[]);
+        onTaskCreated={(newTaskRaw) => {
+          const newTask: Task = {
+            id: newTaskRaw.id.toString(),
+            title: newTaskRaw.taskTitle,
+            assignee: newTaskRaw.assignedTo.toString(),
+            dueDate: newTaskRaw.deadline.split('T')[0],
+            priority: newTaskRaw.priority as 'High' | 'Medium' | 'Low',
+            status: newTaskRaw.status as 'Open' | 'In Progress' | 'Completed',
+            locked: false,
+          };
+          setTasks((prev) => [newTask, ...prev]);
         }}
         isAdmin={isAdmin}
       />
@@ -155,14 +198,43 @@ const ViewTasks: React.FC = () => {
           ))}
         </Box>
       ) : (
-        <TasksTable
-          tasks={tasks}
-          isAdmin={isAdmin}
-          onUpdateTask={handleUpdateTask}
-          onDeleteTask={handleDeleteTask}
-          onLockTask={handleLockTask}
-          navigate={navigate}
-        />
+        <>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+            <TextField
+              label="Search by Title"
+              variant="outlined"
+              size="small"
+              value={searchTitle}
+              onChange={handleTitleSearch}
+              sx={{ width: 300 }}
+            />
+            <TextField
+              label="Search by Assignee"
+              variant="outlined"
+              size="small"
+              value={searchAssignee}
+              onChange={handleAssigneeSearch}
+              sx={{ width: 300 }}
+            />
+            <TextField
+              label="Search by Status"
+              variant="outlined"
+              size="small"
+              value={searchStatus}
+              onChange={handleStatusSearch}
+              sx={{ width: 300 }}
+            />
+          </Box>
+
+          <TasksTable
+            tasks={filteredTasks}
+            isAdmin={isAdmin}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={handleDeleteTask}
+            onLockTask={handleLockTask}
+            navigate={navigate}
+          />
+        </>
       )}
 
       <Snackbar

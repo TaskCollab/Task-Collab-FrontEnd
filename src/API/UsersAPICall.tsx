@@ -14,7 +14,7 @@ export const UsersAPI = {
   createUser: async (userData: {
     username: string;
     password: string;
-    role: number; // roleId
+    role: number; 
   }) => {
     const token = localStorage.getItem('authToken');
     const response = await axios.post(
@@ -91,10 +91,9 @@ export interface UserDTO {
 
 export interface RoleDTO {
   roleName: string;
-  permissions?: {
-    create: boolean;
-    read: boolean;
-    update: boolean;
-    delete: boolean;
-  };
+  createPermission?: boolean;
+  readPermission?: boolean;
+  updatePermission?: boolean;
+  deletePermission?: boolean;
+  userName?: string;
 }
