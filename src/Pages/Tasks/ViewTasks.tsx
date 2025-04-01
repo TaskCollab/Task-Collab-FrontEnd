@@ -5,8 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import TasksTable from './TasksTable';
 import { TaskAPI } from '../../API/TasksAPICall';
 import CreateTask from './CreateTask';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 type Task = {
   id: string;
@@ -20,12 +19,14 @@ type Task = {
 
 const ViewTasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [searchTitle, setSearchTitle] = useState<string>('');
+  const [searchAssignee, setSearchAssignee] = useState<string>('');
+  const [searchStatus, setSearchStatus] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,12 +54,30 @@ const ViewTasks: React.FC = () => {
     fetchTasks();
   }, []);
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-    setFilteredTasks(
-      tasks.filter(task => task.title.toLowerCase().includes(query))
+  useEffect(() => {
+    const titleFilter = searchTitle.toLowerCase();
+    const assigneeFilter = searchAssignee.toLowerCase();
+    const statusFilter = searchStatus.toLowerCase();
+
+    const filtered = tasks.filter((task) =>
+      task.title.toLowerCase().includes(titleFilter) &&
+      task.assignee.toLowerCase().includes(assigneeFilter) &&
+      task.status.toLowerCase().includes(statusFilter)
     );
+
+    setFilteredTasks(filtered);
+  }, [searchTitle, searchAssignee, searchStatus, tasks]);
+
+  const handleTitleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTitle(e.target.value);
+  };
+
+  const handleAssigneeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchAssignee(e.target.value);
+  };
+
+  const handleStatusSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchStatus(e.target.value);
   };
 
   const handleUpdateTask = async (updatedTask: Task) => {
@@ -71,16 +90,9 @@ const ViewTasks: React.FC = () => {
         priority: updatedTask.priority,
       };
       await TaskAPI.updateTask(parseInt(updatedTask.id), updateData);
-      const updatedTaskList = tasks.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task
+      setTasks((prev) =>
+        prev.map((task) => (task.id === updatedTask.id ? updatedTask : task))
       );
-      setTasks(updatedTaskList);
-      const loweredQuery = searchQuery.toLowerCase();
-      const filtered = loweredQuery
-        ? updatedTaskList.filter((task) =>
-            task.title.toLowerCase().includes(loweredQuery)
-          ) : updatedTaskList;
-      setFilteredTasks(filtered);
     } catch (error) {
       console.error('Error updating task:', error);
       setError('Failed to update task');
@@ -91,7 +103,6 @@ const ViewTasks: React.FC = () => {
     try {
       await TaskAPI.deleteTask(parseInt(taskId));
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
-      setFilteredTasks(prev => prev.filter(task => task.id !== taskId));
     } catch (error) {
       console.error('Error deleting task:', error);
       setError('Failed to delete task');
@@ -101,7 +112,9 @@ const ViewTasks: React.FC = () => {
   const handleLockTask = async (taskId: string) => {
     try {
       setTasks((prev) =>
-        prev.map((task) => (task.id === taskId ? { ...task, locked: !task.locked } : task))
+        prev.map((task) =>
+          task.id === taskId ? { ...task, locked: !task.locked } : task
+        )
       );
     } catch (error) {
       console.error('Error locking task:', error);
@@ -163,11 +176,17 @@ const ViewTasks: React.FC = () => {
       <CreateTask
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        onTaskCreated={(newTask) => {
-          setTasks((prev) => [newTask, ...prev] as Task[]);
-          if (searchQuery.trim() === '' || newTask.taskTitle.toLowerCase().includes(searchQuery)) {
-            setFilteredTasks(prev => [newTask, ...prev] as Task[]);
-          }
+        onTaskCreated={(newTaskRaw) => {
+          const newTask: Task = {
+            id: newTaskRaw.id.toString(),
+            title: newTaskRaw.taskTitle,
+            assignee: newTaskRaw.assignedTo.toString(),
+            dueDate: newTaskRaw.deadline.split('T')[0],
+            priority: newTaskRaw.priority as 'High' | 'Medium' | 'Low',
+            status: newTaskRaw.status as 'Open' | 'In Progress' | 'Completed',
+            locked: false,
+          };
+          setTasks((prev) => [newTask, ...prev]);
         }}
         isAdmin={isAdmin}
       />
@@ -180,25 +199,43 @@ const ViewTasks: React.FC = () => {
         </Box>
       ) : (
         <>
-        <TextField
-  label="Search Tasks"
-  variant="outlined"
-  size="small"
-  value={searchQuery}
-  onChange={handleSearchChange}
-  sx={{ mb: 2, width: '100%', maxWidth: 400 }}
-/>
-        <TasksTable
-          tasks={filteredTasks}
-          isAdmin={isAdmin}
-          onUpdateTask={handleUpdateTask}
-          onDeleteTask={handleDeleteTask}
-          onLockTask={handleLockTask}
-          navigate={navigate}
-        />
-    </>
-      )}
+          <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+            <TextField
+              label="Search by Title"
+              variant="outlined"
+              size="small"
+              value={searchTitle}
+              onChange={handleTitleSearch}
+              sx={{ width: 300 }}
+            />
+            <TextField
+              label="Search by Assignee"
+              variant="outlined"
+              size="small"
+              value={searchAssignee}
+              onChange={handleAssigneeSearch}
+              sx={{ width: 300 }}
+            />
+            <TextField
+              label="Search by Status"
+              variant="outlined"
+              size="small"
+              value={searchStatus}
+              onChange={handleStatusSearch}
+              sx={{ width: 300 }}
+            />
+          </Box>
 
+          <TasksTable
+            tasks={filteredTasks}
+            isAdmin={isAdmin}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={handleDeleteTask}
+            onLockTask={handleLockTask}
+            navigate={navigate}
+          />
+        </>
+      )}
 
       <Snackbar
         open={!!error}
