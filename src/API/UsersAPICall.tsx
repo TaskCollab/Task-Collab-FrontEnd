@@ -91,10 +91,9 @@ export interface UserDTO {
 
 export interface RoleDTO {
   roleName: string;
-  permissions?: {
-    create: boolean;
-    read: boolean;
-    update: boolean;
-    delete: boolean;
-  };
+  createPermission?: boolean;
+  readPermission?: boolean;
+  updatePermission?: boolean;
+  deletePermission?: boolean;
+  userName?: string;
 }
