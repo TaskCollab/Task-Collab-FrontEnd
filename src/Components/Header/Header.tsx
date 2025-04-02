@@ -121,39 +121,41 @@ const Header: React.FC = () => {
   return (
     <AppBar position="static">
       <Toolbar>
+  
         <Box sx={{ flexGrow: 1 }} />
 
-        <IconButton 
-          size="large"
-          color="inherit"
-          onClick={handleNotificationOpen}
-          sx={{ mr: 2 }}
-        >
-          <Badge badgeContent={unreadCount} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
           <Button color="inherit" onClick={() => navigate('/home')}>Home</Button>
-        </Typography>
+        </Box>
 
-        <Button color="inherit" onClick={handleOpenCreateDialog}>New Task</Button>
-
-        {isAdmin && (
-          <Button color="inherit" component={Link} to="/manage-users">
-            Manage Users
-          </Button>
-        )}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton
+            size="large"
+            color="inherit"
+            onClick={handleNotificationOpen}
+          >
+            <Badge badgeContent={unreadCount} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+  
+          <Button color="inherit" onClick={handleOpenCreateDialog}>New Task</Button>
+  
+          {isAdmin && (
+            <Button color="inherit" component={Link} to="/manage-users">
+              Manage Users
+            </Button>
+          )}
+        </Box>
       </Toolbar>
-
+  
       <CreateTask
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
         onTaskCreated={handleTaskCreated}
         isAdmin={isAdmin}
       />
-
+  
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -182,24 +184,24 @@ const Header: React.FC = () => {
               }}
             >
               <Box sx={{ width: '100%' }}>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
+                <Typography
+                  variant="subtitle2"
+                  sx={{
                     fontWeight: notification.readStatus ? 400 : 600,
                     color: notification.readStatus ? 'text.secondary' : 'text.primary'
                   }}
                 >
                   {notification.notificationTitle}
                 </Typography>
-                <Typography 
-                  variant="body2" 
+                <Typography
+                  variant="body2"
                   color="text.secondary"
                   sx={{ mt: 0.5 }}
                 >
                   {notification.content}
                 </Typography>
-                <Typography 
-                  variant="caption" 
+                <Typography
+                  variant="caption"
                   color="text.disabled"
                   sx={{ display: 'block', mt: 1 }}
                 >
@@ -217,7 +219,7 @@ const Header: React.FC = () => {
         )}
       </Menu>
     </AppBar>
-  );
+  );  
 };
 
 export default Header;

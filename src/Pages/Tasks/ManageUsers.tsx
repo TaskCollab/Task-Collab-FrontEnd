@@ -178,11 +178,11 @@ const ManageUsers: React.FC = () => {
         onConfirm={handleConfirmDelete}
       />
 
-      <CreateUserDialog // Use your CreateUserDialog component
+      <CreateUserDialog 
         open={createUserOpen}
         onClose={() => setCreateUserOpen(false)}
-        onCreate={handleUserCreated} // Pass the modified handleUserCreated function
-        roles={roleObjects} // Pass the role objects
+        onCreate={handleUserCreated} 
+        roles={roleObjects}
       />
 
       {error && (
