@@ -68,3 +68,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### Testing
 
 The testing is done by cypress, this section has mmoved here: [https://www.cypress.io/]
+
+### CI Pipeline Tests
+
